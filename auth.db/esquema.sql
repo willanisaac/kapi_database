@@ -388,7 +388,7 @@ CREATE TABLE auth.audit_logs (
     description TEXT NOT NULL,
     
     -- Detalles adicionales (JSON flexible)
-    metadata JSONB,  -- Ej: cambios realizados, valores anteriores, etc.
+    event_metadata JSONB,  -- Ej: cambios realizados, valores anteriores, etc.
     
     -- Información del request
     ip_address INET,
@@ -406,8 +406,8 @@ CREATE TABLE auth.audit_logs (
     -- Timestamp
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    -- Índice en metadata para búsquedas
-    CONSTRAINT metadata_is_object CHECK (jsonb_typeof(metadata) = 'object' OR metadata IS NULL)
+    -- Índice en event_metadata para búsquedas
+    CONSTRAINT event_metadata_is_object CHECK (jsonb_typeof(event_metadata) = 'object' OR event_metadata IS NULL)
 );
 
 -- Índices para audit_logs
@@ -417,7 +417,7 @@ CREATE INDEX idx_audit_logs_severity ON auth.audit_logs(severity);
 CREATE INDEX idx_audit_logs_created_at ON auth.audit_logs(created_at DESC);
 CREATE INDEX idx_audit_logs_ip_address ON auth.audit_logs(ip_address);
 CREATE INDEX idx_audit_logs_success ON auth.audit_logs(success);
-CREATE INDEX idx_audit_logs_metadata ON auth.audit_logs USING GIN(metadata);
+CREATE INDEX idx_audit_logs_metadata ON auth.audit_logs USING GIN(event_metadata);
 
 -- ============================================================================
 -- TABLA: login_history
@@ -632,7 +632,8 @@ BEGIN
         ) VALUES (
             NEW.id, NEW.username, 'account_locked', 'warning',
             'Account locked due to too many failed login attempts',
-            TRUE, jsonb_build_object(
+            TRUE, 
+            jsonb_build_object(
                 'failed_attempts', NEW.failed_login_attempts,
                 'locked_until', NEW.locked_until
             )
