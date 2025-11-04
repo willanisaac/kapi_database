@@ -5,16 +5,17 @@
 -- Fecha: 3 de noviembre de 2025
 -- ============================================================================
 
--- Crear el esquema
-DROP SCHEMA IF EXISTS auth CASCADE;
-CREATE SCHEMA auth;
-
 -- Establecer el esquema por defecto para esta sesión
 SET search_path TO auth;
 
 -- ============================================================================
 -- EXTENSIONES NECESARIAS
 -- ============================================================================
+
+DROP EXTENSION IF EXISTS "uuid-ossp";      -- Para generar UUIDs
+DROP EXTENSION IF EXISTS "pgcrypto";       -- Para encriptación adicional
+DROP EXTENSION IF EXISTS "citext";         -- Para emails case-i
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";      -- Para generar UUIDs
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";       -- Para encriptación adicional
 CREATE EXTENSION IF NOT EXISTS "citext";         -- Para emails case-insensitive
@@ -454,9 +455,9 @@ CREATE INDEX idx_login_history_attempted_at ON auth.login_history(attempted_at D
 CREATE INDEX idx_login_history_success ON auth.login_history(success);
 CREATE INDEX idx_login_history_ip_address ON auth.login_history(ip_address);
 
--- Índice parcial para intentos fallidos recientes (útil para detección de ataques)
+-- Índice parcial para intentos fallidos (útil para detección de ataques)
 CREATE INDEX idx_login_history_failed_recent ON auth.login_history(email, attempted_at DESC) 
-    WHERE NOT success AND attempted_at > CURRENT_TIMESTAMP - INTERVAL '1 hour';
+    WHERE NOT success;
 
 -- ============================================================================
 -- TABLA: security_settings
