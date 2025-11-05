@@ -27,15 +27,13 @@ CREATE TABLE IF NOT EXISTS sncyt.titulo
     insititucion text COLLATE pg_catalog."default",
     tipo character varying(50) COLLATE pg_catalog."default",
     reconocido_por text COLLATE pg_catalog."default",
-    numero_registro character varying(50) COLLATE pg_catalog."default",
-    fecha_registso date,
+    numero_registro character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    fecha_registro date,
     area_campo text COLLATE pg_catalog."default",
-    obserbacion text COLLATE pg_catalog."default",
+    observacion text COLLATE pg_catalog."default",
+    CONSTRAINT titulo_pkey PRIMARY KEY (numero_registro),
     CONSTRAINT titulo_letrado_id_fkey FOREIGN KEY (letrado_id)
         REFERENCES sncyt.letrado (identificacion) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 )
-
-
-
